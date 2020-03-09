@@ -1,6 +1,6 @@
 # clojure-mpesa-wrapper
 
-A Clojure library designed to ... well, that part is up to you.
+A clojure wrapper around mpesa daraja api
 
 ## Usage
 
@@ -8,7 +8,7 @@ FIXME
 
 ## License
 
-Copyright © 2020 FIXME
+Copyright © 2020 Ike Mawira
 
 This program and the accompanying materials are made available under the
 terms of the Eclipse Public License 2.0 which is available at
