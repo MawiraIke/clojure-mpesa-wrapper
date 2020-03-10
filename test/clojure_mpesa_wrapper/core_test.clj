@@ -2,6 +2,8 @@
   (:require [clojure.test :refer :all]
             [clojure-mpesa-wrapper.core :refer :all]))
 
-(deftest a-test
-  (testing "FIXME, I fail."
-    (is (= 0 1))))
+;; Requires a key and a secret to pass
+(deftest authentication-test
+  (testing "Authentication"
+    (is (= (type (auth "<Enter key as a String" "<Enter secret as a String>"))
+           clojure.lang.PersistentArrayMap))))
