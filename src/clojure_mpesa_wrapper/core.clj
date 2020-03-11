@@ -1,5 +1,5 @@
 (ns clojure-mpesa-wrapper.core
-  (:require [clojure.data.json :refer [read-str]]
+  (:require [clojure.data.json :refer [read-str write-str]]
             [clj-http.client :as http]
             [clojure-mpesa-wrapper.Keys.keys :as ks])
   (:import (java.util Base64)))
@@ -68,6 +68,25 @@
       (read-str body :key-fn keyword))))
 
 
+;; check account balance
+(defn balance [initiator security-credential short-code remarks queue-url result-url]
+  (let [url "https://sandbox.safaricom.co.ke/mpesa/accountbalance/v1/query"
+        {:keys [body]}
+        (http/post
+          url
+          {:headers     {"Content-Type" "application/json"}
+           :oauth-token "ACCESS_TOKEN"
+           :body        (write-str {
+                                    :Initiator          initiator
+                                    :SecurityCredential security-credential
+                                    :CommandID          "AccountBalance"
+                                    :PartyA             short-code
+                                    :IdentifierType     "4"
+                                    :Remarks            remarks
+                                    :QueueTimeOutURL    queue-url
+                                    :ResultURL          result-url
+                                    })})]
+    (read-str body :key-fn keyword)))
 
 
 
