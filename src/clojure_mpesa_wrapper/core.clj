@@ -46,7 +46,7 @@
     :default
     (let [url "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
           time-stamp (format-to-timestamp (java.util.Date.))
-          raw-password (str business-short-code (:pass-key ks/db) time-stamp)
+          raw-password (str business-short-code (:pass-key ks/db) time-stamp) ;; todo change the key
           encoding (encode raw-password)
           {:keys [body]}
           (clj-http.client/post
@@ -68,9 +68,17 @@
       (read-str body :key-fn keyword))))
 
 
-;; check account balance
-(defn balance [initiator security-credential short-code remarks queue-url result-url]
-  (let [url "https://sandbox.safaricom.co.ke/mpesa/accountbalance/v1/query"
+;; Check Account balance
+;; Use this API to enquire the balance on an M-Pesa BuyGoods (Till Number). Expects a
+;; map with the following keys
+;;   :initiator -              The credential/username used to authenticate the transaction request
+;;   :short-code -             The short code of the organization receiving the funds
+;;   :remarks -                Comments that are sent along with the transaction
+;;   :queue-url -              The path that stores the information of a time out transaction
+;;   :result-url -             The path that receives a successful transaction
+(defn balance [{:keys [initiator short-code remarks queue-url result-url] :or {remarks "Checking account balance"}}]
+  (let [security-credential (encode (str short-code (:pass-key ks/db))) ;; todo change the key to a more dynamic one
+        url "https://sandbox.safaricom.co.ke/mpesa/accountbalance/v1/query"
         {:keys [body]}
         (http/post
           url
