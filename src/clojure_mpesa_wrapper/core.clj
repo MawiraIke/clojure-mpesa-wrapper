@@ -5,13 +5,6 @@
   (:import (java.util Base64)))
 
 
-;; Authenticate,
-;; Expects a key and a secret, both should be strings.
-(defn auth [client-key client-secret]
-  (let [url "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
-        {:keys [body]} (http/get url {:basic-auth [client-key client-secret]})]
-    (read-str body :key-fn keyword)))
-
 ;; Return timestamp in the format "YYYYMMddHHmmss"
 (defn format-to-timestamp [time]
   (.replaceAll (.format (java.text.SimpleDateFormat. "YYYYMMdd HHmmss") time) "\\s" ""))
@@ -21,6 +14,19 @@
   (let [message-bytes (.getBytes to-encode)
         encoder (Base64/getEncoder)]
     (.encodeToString encoder message-bytes)))
+
+
+
+;; ------------- API Methods
+
+
+;; Authenticate,
+;; Expects a key and a secret, both should be strings.
+(defn auth [client-key client-secret]
+  (let [url "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
+        {:keys [body]} (http/get url {:basic-auth [client-key client-secret]})]
+    (read-str body :key-fn keyword)))
+
 
 ;; Lipa na mpesa,
 ;; Only works with Pay Bill. Buy Goods is not currently supported by the API.
