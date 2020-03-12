@@ -9,6 +9,7 @@ Supported endpoints,
 2. Lipa na Mpesa
 3. Check balance
 4. C2B API
+
 Looking to include, 
 1. B2C API
 2. B2B API
