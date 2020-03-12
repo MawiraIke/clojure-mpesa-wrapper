@@ -31,28 +31,29 @@
 ;; Lipa na mpesa,
 ;; Only works with Pay Bill. Buy Goods is not currently supported by the API.
 ;; Expected argument is a map containing key value pairs of:
-;;   :business-short-code,        Required, The paybill number
+;;   :short-code,        Required, The paybill number
 ;;   :transaction-type,           Optional, Transaction type, default, "CustomerPayBillOnline"
 ;;                                The only supported type is "CustomerPayBillOnline"
-;;   :amount,                     Required, The amount to be transacted
+;;   :amount,                     Required, int, The amount to be transacted
 ;;   :phone-number,               Required, The MSISDN sending the funds.
 ;;   :callback-url,               Required, The url to where responses from M-Pesa will be sent to.
 ;;   :account-reference,          Optional, Used with M-Pesa PayBills, default, "account"
 ;;   :transaction-description     Optional, A description of the transaction, default, "Lipa na Mpesa Online"
 (defn lipa-na-mpesa [{:as   details-map
-                      :keys [business-short-code transaction-type amount phone-number
+                      :keys [short-code transaction-type amount phone-number
                              callback-url account-reference transaction-description]
                       :or   {account-reference       "account"
                              transaction-type        "CustomerPayBillOnline"
                              transaction-description "Lipa na Mpesa Online"}}]
   (cond
-    (not (.startsWith phone-number "254")) (throw (AssertionError. "Phone number is required to start with 254"))
-    (not= (count phone-number) 12) (throw (AssertionError. "This phone number seems to be invalid"))
+    ;;(not (.startsWith phone-number "254")) (throw (IllegalArgumentException. "Phone number is required to start with 254"))
+    ;;(not= (count phone-number) 12) (throw (IllegalArgumentException. "This phone number seems to be invalid"))
+    ;;(not= (type amount) java.lang.Long) (throw (IllegalArgumentException. "Amount should be a number."))
     (< amount 1) (throw (AssertionError. "Amount should be at least Ksh 1"))
     :default
     (let [url "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
           time-stamp (format-to-timestamp (java.util.Date.))
-          raw-password (str business-short-code (:pass-key ks/db) time-stamp) ;; todo change the key
+          raw-password (str short-code (:pass-key ks/db) time-stamp) ;; todo change the key
           encoding (encode raw-password)
           {:keys [body]}
           (clj-http.client/post
@@ -60,13 +61,13 @@
             {:headers     {"Content-Type" "application/json"}
              :oauth-token "ACCESS_TOKEN"
              :body        (clojure.data.json/write-str
-                            {:BusinessShortCode business-short-code
+                            {:BusinessShortCode short-code
                              :Password          encoding
                              :Timestamp         time-stamp
                              :TransactionType   transaction-type
-                             :Amount            amount
+                             :Amount            (str amount)
                              :PartyA            phone-number
-                             :PartyB            business-short-code
+                             :PartyB            short-code
                              :PhoneNumber       phone-number
                              :CallBackURL       callback-url
                              :AccountReference  account-reference
@@ -101,6 +102,9 @@
                                     :ResultURL          result-url
                                     })})]
     (read-str body :key-fn keyword)))
+
+
+
 
 
 
