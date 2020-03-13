@@ -166,8 +166,7 @@
 ;;   :transaction-description     Optional, String, A description of the transaction, default, "Lipa na Mpesa Online".
 ;;                                Must be less than 20 characters
 ;;   :passkey                     Optional, String, Lipa na mpesa pass key.
-(defn lipa-na-mpesa [{:as   details-map
-                      :keys [short-code transaction-type amount phone-number
+(defn lipa-na-mpesa [{:keys [short-code transaction-type amount phone-number
                              callback-url account-reference transaction-description passkey]
                       :or   {account-reference       "account"
                              transaction-type        "CustomerPayBillOnline"
@@ -192,7 +191,7 @@
                              :Password          encoding
                              :Timestamp         time-stamp
                              :TransactionType   transaction-type
-                             :Amount            (str amount)
+                             :Amount            amount
                              :PartyA            phone-number
                              :PartyB            short-code
                              :PhoneNumber       phone-number
