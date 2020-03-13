@@ -38,7 +38,7 @@
 ;;                             encrypted using M-Pesa public key and validates the transaction on
 ;;                             M-Pesa Core system.
 (defn balance [{:keys [initiator short-code remarks queue-url result-url security-credential]
-                :or {remarks "Checking account balance"}}]
+                :or   {remarks "Checking account balance"}}]
   (let [url "https://sandbox.safaricom.co.ke/mpesa/accountbalance/v1/query"
         {:keys [body]}
         (http/post url
@@ -67,7 +67,7 @@
 ;; M-Pesa completes or cancels the transaction depending on the validation response it receives from the 3rd
 ;; party system. A confirmation request of the transaction is then sent by M-Pesa through the confirmation URL
 ;; back to the 3rd party which then should respond with a success acknowledging the confirmation.
-;; Params:
+;; Expects a map with the following keys:
 ;;   :short-code -       Required, Number, The short code of the organization.
 ;;   :response-type -    Required, String, Default response type for timeout.
 ;;   :confirmation-url - Required, String, Confirmation URL for the client.
@@ -164,6 +164,27 @@
                              :TransactionDesc   transaction-description})})]
       (read-str body :key-fn keyword))))
 
+
+(defn b2c [{:keys [initiator-name security-credential command-id amount sender-party receiver-party remarks queue-url
+                   result-url occasion]
+            :or {command-id "BusinessPayment"
+                 remarks "B2C Payment"}}]
+  (let [{:keys [body]}
+        (http/post "https://sandbox.safaricom.co.ke/mpesa/b2c/v1/paymentrequest"
+                              {:headers     {"Content-Type" "application/json"}
+                               :oauth-token "ACCESS_TOKEN"
+                               :body        (write-str
+                                              {:InitiatorName      initiator-name
+                                               :SecurityCredential security-credential
+                                               :CommandID          command-id
+                                               :Amount             amount
+                                               :PartyA             sender-party
+                                               :PartyB             receiver-party
+                                               :Remarks            remarks
+                                               :QueueTimeOutURL    queue-url
+                                               :ResultURL          result-url
+                                               :Occasion           occasion})})]
+    (read-str body :key-fn keyword)))
 
 
 
