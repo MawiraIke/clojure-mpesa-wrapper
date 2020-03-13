@@ -5,17 +5,17 @@ A clojure wrapper around mpesa daraja api
 Work in progress, feel free to contribute.
 
 Supported endpoints,
-1. Authentication
-2. Lipa na Mpesa
+1. Authentication 
+2. B2C API
 3. Check balance
 4. C2B API
+5. Lipa na Mpesa
 
 Looking to include, 
-1. B2C API
-2. B2B API
-3. Lipa na M-Pesa Online
+1. B2B API
+2. Lipa na M-Pesa Online
+3. Reversal
 4. Transaction Status
-5. Reversal
 
 
 ## License

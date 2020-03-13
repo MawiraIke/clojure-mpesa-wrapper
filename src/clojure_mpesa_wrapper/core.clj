@@ -56,6 +56,43 @@
 
 
 
+;; B2C Payment Request
+;; This API enables Business to Customer (B2C) transactions between a company and customers who are the end-users of its
+;; products or services. Use of this API requires a valid and verified B2C M-Pesa Short code.
+;; Expects a map with the following keys:
+;;   initiator-name - Required, String, This is the credential/username used to authenticate the transaction request.
+;;   command-id -     Required, String, Unique command for each transaction type e.g. SalaryPayment, BusinessPayment,
+;;                    PromotionPayment
+;;   amount -         Required, Number, The amount being transacted
+;;   sender-party -   Required, Number, Organization’s shortcode initiating the transaction.
+;;   receiver-party - Required, Number, Phone number receiving the transaction
+;;   remarks -        Required, String, Comments that are sent along with the transaction.
+;;   queue-url -      Required, String, The timeout end-point that receives a timeout response.
+;;   result-url -     Required, String, The end-point that receives the response of the transaction
+;;   occasion -       Optional
+(defn b2c [{:keys [initiator-name security-credential command-id amount sender-party receiver-party remarks queue-url
+                   result-url occasion]
+            :or {command-id "BusinessPayment"
+                 remarks "B2C Payment"}}]
+  (let [{:keys [body]}
+        (http/post "https://sandbox.safaricom.co.ke/mpesa/b2c/v1/paymentrequest"
+                   {:headers     {"Content-Type" "application/json"}
+                    :oauth-token "ACCESS_TOKEN"
+                    :body        (write-str
+                                   {:InitiatorName      initiator-name
+                                    :SecurityCredential security-credential
+                                    :CommandID          command-id
+                                    :Amount             amount
+                                    :PartyA             sender-party
+                                    :PartyB             receiver-party
+                                    :Remarks            remarks
+                                    :QueueTimeOutURL    queue-url
+                                    :ResultURL          result-url
+                                    :Occasion           occasion})})]
+    (read-str body :key-fn keyword)))
+
+
+
 ;; C2B API
 ;; The API enables PayBill and Buy Goods merchants to integrate M-Pesa and receive real time payments notifications
 
@@ -164,27 +201,6 @@
                              :TransactionDesc   transaction-description})})]
       (read-str body :key-fn keyword))))
 
-
-(defn b2c [{:keys [initiator-name security-credential command-id amount sender-party receiver-party remarks queue-url
-                   result-url occasion]
-            :or {command-id "BusinessPayment"
-                 remarks "B2C Payment"}}]
-  (let [{:keys [body]}
-        (http/post "https://sandbox.safaricom.co.ke/mpesa/b2c/v1/paymentrequest"
-                              {:headers     {"Content-Type" "application/json"}
-                               :oauth-token "ACCESS_TOKEN"
-                               :body        (write-str
-                                              {:InitiatorName      initiator-name
-                                               :SecurityCredential security-credential
-                                               :CommandID          command-id
-                                               :Amount             amount
-                                               :PartyA             sender-party
-                                               :PartyB             receiver-party
-                                               :Remarks            remarks
-                                               :QueueTimeOutURL    queue-url
-                                               :ResultURL          result-url
-                                               :Occasion           occasion})})]
-    (read-str body :key-fn keyword)))
 
 
 
