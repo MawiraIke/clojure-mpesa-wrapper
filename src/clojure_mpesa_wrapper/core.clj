@@ -136,9 +136,9 @@
                              transaction-type        "CustomerPayBillOnline"
                              transaction-description "Lipa na Mpesa Online"}}]
   (cond
+    (not= (type amount) java.lang.Long) (throw (IllegalArgumentException. "Amount should be a number."))
     (not (.startsWith phone-number "254")) (throw (IllegalArgumentException. "Phone number is required to start with 254"))
     (not= (count phone-number) 12) (throw (IllegalArgumentException. "This phone number seems to be invalid"))
-    (not= (type amount) java.lang.Long) (throw (IllegalArgumentException. "Amount should be a number."))
     (< amount 1) (throw (AssertionError. "Amount should be at least Ksh 1"))
     :default
     (let [url "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
