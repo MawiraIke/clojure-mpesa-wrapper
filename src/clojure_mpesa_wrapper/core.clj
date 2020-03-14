@@ -273,7 +273,21 @@
 
 
 
-
+;; Reversal
+;; Reverses a B2B, B2C or C2B M-Pesa transaction.
+;; Expects a map with the following keys:
+;;   :transaction-id -      Required, String, The transaction id for reversal eg LKXXXX1234
+;;   :amount -              Required, Number, Amount being transacted
+;;   :queue-url -           Required, String, The path that stores information of time out transaction.
+;;   :result-url -          Required, String, The path that stores information of transaction.
+;;   :short-code -          Required, String, Organization Receiving the funds.
+;;   :remarks -             Optional, String, Comments that are sent along with the transaction.
+;;   :occasion -            Optional, String, Optional Parameter
+;;   :initiator -           Required, This is the credential/username used to authenticate the transaction request.
+;;   :receiver-id-type -    Optional, String, Type of organization receiving the transaction
+;;   :command-id -          Optional, String, Takes only 'TransactionReversal' Command id
+;;   :security-credential - Required, String, Base64 encoded string of the M-Pesa short code and password, which is
+;;                          encrypted using M-Pesa public key and validates the transaction on M-Pesa Core system.
 (defn reversal [{:keys [transaction-id amount queue-url result-url short-code remarks occasion initiator
                         receiver-id-type command-id security-credential]
                  :or   {remarks          "Reversal"
@@ -287,7 +301,7 @@
                     :body        (write-str
                                    {:Initiator              initiator
                                     :SecurityCredential     security-credential
-                                    :CommandID              command-id
+                                    :CommandID              "TransactionReversal"
                                     :TransactionID          transaction-id
                                     :Amount                 amount
                                     :ReceiverParty          short-code
