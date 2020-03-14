@@ -223,6 +223,29 @@
 
 
 
+;; B2B request
+;; This API enables Business to Business (B2B) transactions between a business and another business. Use of this API
+;; requires a valid and verified B2B M-Pesa short code for the business initiating the transaction and the both
+;; businesses involved in the transaction.
+;; Expects a map with the following keys:
+;;    :initiator - 	              Required, String, This is the credential/username used to authenticate the transaction request.
+;;    :security-credential - 	    Required, String, Base64 encoded string of the B2B short code and password, which is encrypted using
+;;                                M-Pesa public key and validates the transaction on M-Pesa Core system.
+;;    :command-id -               Optional, String, Unique command for each transaction type, possible values are: BusinessPayBill,
+;;                                MerchantToMerchantTransfer, MerchantTransferFromMerchantToWorking,
+;;                                MerchantServicesMMFAccountTransfer, AgencyFloatAdvance
+;;    :sender-identifier-type -   Optional, Number, Type of organization sending the transaction.
+;;    :receiver-identifier-type - Optional, Number, Type of organization receiving the funds being transacted.
+;;    :amount -                   Required, Number, The amount being transacted.
+;;    :party-a -                  Required, Number, Organization’s short code initiating the transaction.
+;;    :party-b -                  Required, Number, Organization’s short code receiving the funds being transacted.
+;;    :account-reference -        Required, String, Account Reference mandatory for “BusinessPaybill” CommandID.
+;;    :remarks -                  Optional, String, Comments that are sent along with the transaction.
+;;    :queue-url -                Required, String, The path that stores information of time out transactions.it should be properly
+;;                                validated to make sure that it contains the port, URI and domain name or publicly
+;;                                available IP.
+;;    :result-url -               Required, String, The path that receives results from M-Pesa it should be properly validated to make sure that it
+;;                                contains the port, URI and domain name or publicly available IP.
 (defn b2b [{:keys [initiator security-credential command-id sender-identifier-type receiver-identifier-type amount
                    party-a party-b account-reference remarks queue-url result-url]
             :or {sender-identifier-type 4
