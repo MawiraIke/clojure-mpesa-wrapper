@@ -7,15 +7,15 @@ Work in progress, feel free to contribute.
 Supported endpoints,
 1. Authentication 
 2. B2C API
-3. Check balance
-4. C2B API
-5. Lipa na Mpesa
-6. B2B API
+3. B2B API
+4. Check balance
+5. C2B API
+6. Lipa na Mpesa
+7. Reversal 
 
 Looking to include, 
 1. Lipa na M-Pesa Online
-2. Reversal
-3. Transaction Status
+2. Transaction Status
 
 
 ## License
