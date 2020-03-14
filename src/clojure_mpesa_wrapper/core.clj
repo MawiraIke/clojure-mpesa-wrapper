@@ -60,6 +60,56 @@
 
 
 
+;; B2B request
+;; This API enables Business to Business (B2B) transactions between a business and another business. Use of this API
+;; requires a valid and verified B2B M-Pesa short code for the business initiating the transaction and the both
+;; businesses involved in the transaction.
+;; Expects a map with the following keys:
+;;    :initiator - 	              Required, String, This is the credential/username used to authenticate the transaction request.
+;;    :security-credential - 	    Required, String, Base64 encoded string of the B2B short code and password, which is encrypted using
+;;                                M-Pesa public key and validates the transaction on M-Pesa Core system.
+;;    :command-id -               Optional, String, Unique command for each transaction type, possible values are: BusinessPayBill,
+;;                                MerchantToMerchantTransfer, MerchantTransferFromMerchantToWorking,
+;;                                MerchantServicesMMFAccountTransfer, AgencyFloatAdvance
+;;    :sender-identifier-type -   Optional, Number, Type of organization sending the transaction.
+;;    :receiver-identifier-type - Optional, Number, Type of organization receiving the funds being transacted.
+;;    :amount -                   Required, Number, The amount being transacted.
+;;    :party-a -                  Required, Number, Organization’s short code initiating the transaction.
+;;    :party-b -                  Required, Number, Organization’s short code receiving the funds being transacted.
+;;    :account-reference -        Required, String, Account Reference mandatory for “BusinessPaybill” CommandID.
+;;    :remarks -                  Optional, String, Comments that are sent along with the transaction.
+;;    :queue-url -                Required, String, The path that stores information of time out transactions.it should be properly
+;;                                validated to make sure that it contains the port, URI and domain name or publicly
+;;                                available IP.
+;;    :result-url -               Required, String, The path that receives results from M-Pesa it should be properly validated to make sure that it
+;;                                contains the port, URI and domain name or publicly available IP.
+(defn b2b [{:keys [initiator security-credential command-id sender-identifier-type receiver-identifier-type amount
+                   party-a party-b account-reference remarks queue-url result-url]
+            :or   {sender-identifier-type   4
+                   receiver-identifier-type 4
+                   command-id               "BusinessToBusinessTransfer"
+                   remarks                  "B2B Request"}}]
+  (let [{:keys [body]}
+        (http/post
+          "https://sandbox.safaricom.co.ke/mpesa/b2b/v1/paymentrequest"
+          {:headers     {"Content-Type" "application/json"}
+           :oauth-token "ACCESS_TOKEN"
+           :body        (write-str {:Initiator              initiator
+                                    :SecurityCredential     security-credential
+                                    :CommandID              command-id
+                                    :SenderIdentifierType   sender-identifier-type
+                                    :RecieverIdentifierType receiver-identifier-type
+                                    :Amount                 amount
+                                    :PartyA                 party-a
+                                    :PartyB                 party-b
+                                    :AccountReference       account-reference
+                                    :Remarks                remarks
+                                    :QueueTimeOutURL        queue-url
+                                    :ResultURL              result-url})})]
+    (read-str body :key-fn keyword)))
+
+
+
 ;; B2C Payment Request
 ;; This API enables Business to Customer (B2C) transactions between a company and customers who are the end-users of its
 ;; products or services. Use of this API requires a valid and verified B2C M-Pesa Short code.
@@ -184,11 +234,11 @@
 ;;   :transaction-description     Optional, String, A description of the transaction, default, "Lipa na Mpesa Online".
 ;;                                Must be less than 20 characters
 ;;   :passkey                     Optional, String, Lipa na mpesa pass key.
-(defn lipa-na-mpesa [{:keys [short-code transaction-type amount phone-number
-                             callback-url account-reference transaction-description passkey]
-                      :or   {account-reference       "account"
-                             transaction-type        "CustomerPayBillOnline"
-                             transaction-description "Lipa na Mpesa Online"}}]
+(defn lipa-na-mpesa-online [{:keys [short-code transaction-type amount phone-number
+                                    callback-url account-reference transaction-description passkey]
+                             :or   {account-reference       "account"
+                                    transaction-type        "CustomerPayBillOnline"
+                                    transaction-description "Lipa na Mpesa Online"}}]
   {:pre [(and (not= short-code nil) (number? short-code))
          (when transaction-type (string? transaction-type))
          (and (not= amount nil) (number? amount) (>= amount 1))
@@ -223,54 +273,30 @@
 
 
 
-;; B2B request
-;; This API enables Business to Business (B2B) transactions between a business and another business. Use of this API
-;; requires a valid and verified B2B M-Pesa short code for the business initiating the transaction and the both
-;; businesses involved in the transaction.
-;; Expects a map with the following keys:
-;;    :initiator - 	              Required, String, This is the credential/username used to authenticate the transaction request.
-;;    :security-credential - 	    Required, String, Base64 encoded string of the B2B short code and password, which is encrypted using
-;;                                M-Pesa public key and validates the transaction on M-Pesa Core system.
-;;    :command-id -               Optional, String, Unique command for each transaction type, possible values are: BusinessPayBill,
-;;                                MerchantToMerchantTransfer, MerchantTransferFromMerchantToWorking,
-;;                                MerchantServicesMMFAccountTransfer, AgencyFloatAdvance
-;;    :sender-identifier-type -   Optional, Number, Type of organization sending the transaction.
-;;    :receiver-identifier-type - Optional, Number, Type of organization receiving the funds being transacted.
-;;    :amount -                   Required, Number, The amount being transacted.
-;;    :party-a -                  Required, Number, Organization’s short code initiating the transaction.
-;;    :party-b -                  Required, Number, Organization’s short code receiving the funds being transacted.
-;;    :account-reference -        Required, String, Account Reference mandatory for “BusinessPaybill” CommandID.
-;;    :remarks -                  Optional, String, Comments that are sent along with the transaction.
-;;    :queue-url -                Required, String, The path that stores information of time out transactions.it should be properly
-;;                                validated to make sure that it contains the port, URI and domain name or publicly
-;;                                available IP.
-;;    :result-url -               Required, String, The path that receives results from M-Pesa it should be properly validated to make sure that it
-;;                                contains the port, URI and domain name or publicly available IP.
-(defn b2b [{:keys [initiator security-credential command-id sender-identifier-type receiver-identifier-type amount
-                   party-a party-b account-reference remarks queue-url result-url]
-            :or {sender-identifier-type 4
-                 receiver-identifier-type 4
-                 command-id "BusinessToBusinessTransfer"
-                 remarks "B2B Request"}}]
+
+(defn reversal [{:keys [transaction-id amount queue-url result-url short-code remarks occasion initiator
+                        receiver-id-type command-id security-credential]
+                 :or   {remarks          "Reversal"
+                        occasion         "Reversal"
+                        receiver-id-type "4"
+                        command-id       "TransactionReversal"}}]
   (let [{:keys [body]}
-        (http/post
-          "https://sandbox.safaricom.co.ke/mpesa/b2b/v1/paymentrequest"
-          {:headers     {"Content-Type" "application/json"}
-           :oauth-token "ACCESS_TOKEN"
-           :body        (write-str {:Initiator              initiator
+        (http/post "https://sandbox.safaricom.co.ke/mpesa/reversal/v1/request"
+                   {:headers     {"Content-Type" "application/json"}
+                    :oauth-token "ACCESS_TOKEN"
+                    :body        (write-str
+                                   {:Initiator              initiator
                                     :SecurityCredential     security-credential
                                     :CommandID              command-id
-                                    :SenderIdentifierType   sender-identifier-type
-                                    :RecieverIdentifierType receiver-identifier-type
+                                    :TransactionID          transaction-id
                                     :Amount                 amount
-                                    :PartyA                 party-a
-                                    :PartyB                 party-b
-                                    :AccountReference       account-reference
-                                    :Remarks                remarks
+                                    :ReceiverParty          short-code
+                                    :RecieverIdentifierType receiver-id-type
+                                    :ResultURL              result-url
                                     :QueueTimeOutURL        queue-url
-                                    :ResultURL              result-url})})]
+                                    :Remarks                remarks
+                                    :Occasion               occasion})})]
     (read-str body :key-fn keyword)))
-
 
 
 
