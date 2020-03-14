@@ -223,6 +223,33 @@
 
 
 
+(defn b2b [{:keys [initiator security-credential command-id sender-identifier-type receiver-identifier-type amount
+                   party-a party-b account-reference remarks queue-url result-url]
+            :or {sender-identifier-type 4
+                 receiver-identifier-type 4
+                 command-id "BusinessToBusinessTransfer"
+                 remarks "B2B Request"}}]
+  (let [{:keys [body]}
+        (http/post
+          "https://sandbox.safaricom.co.ke/mpesa/b2b/v1/paymentrequest"
+          {:headers     {"Content-Type" "application/json"}
+           :oauth-token "ACCESS_TOKEN"
+           :body        (write-str {:Initiator              initiator
+                                    :SecurityCredential     security-credential
+                                    :CommandID              command-id
+                                    :SenderIdentifierType   sender-identifier-type
+                                    :RecieverIdentifierType receiver-identifier-type
+                                    :Amount                 amount
+                                    :PartyA                 party-a
+                                    :PartyB                 party-b
+                                    :AccountReference       account-reference
+                                    :Remarks                remarks
+                                    :QueueTimeOutURL        queue-url
+                                    :ResultURL              result-url})})]
+    (read-str body :key-fn keyword)))
+
+
+
 
 
 
