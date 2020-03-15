@@ -89,6 +89,18 @@
                    receiver-identifier-type 4
                    command-id               "BusinessToBusinessTransfer"
                    remarks                  "B2B Request"}}]
+  {:pre [(and (not= initiator nil) (string? initiator))
+         (and (not= security-credential nil) (string? security-credential))
+         (when command-id (string? command-id))
+         (when sender-identifier-type (number? sender-identifier-type))
+         (when receiver-identifier-type (number? receiver-identifier-type))
+         (and (not= amount nil) (number? amount))
+         (and (not= party-a nil) (number? party-a))
+         (and (not= party-b nil) (number? party-b))
+         (and (not= account-reference nil) (string? account-reference))
+         (when remarks (string? remarks))
+         (and (not= queue-url nil) (string? queue-url))
+         (and (not= result-url nil) (string? result-url))]}
   (let [{:keys [body]}
         (http/post
           "https://sandbox.safaricom.co.ke/mpesa/b2b/v1/paymentrequest"
@@ -294,6 +306,16 @@
                         occasion         "Reversal"
                         receiver-id-type "4"
                         command-id       "TransactionReversal"}}]
+  {:pre [(and (not= transaction-id nil) (string? transaction-id))
+         (and (not= amount nil) (number? amount))
+         (and (not= queue-url nil) (string? queue-url))
+         (and (not= result-url nil) (string? result-url))
+         (and (not= short-code nil) (string? short-code))
+         (when remarks (string? remarks))
+         (when occasion (string? occasion))
+         (and (not= transaction-id nil) (string? transaction-id))
+         (when command-id (string? command-id))
+         (and (not= security-credential nil) (string? security-credential))]}
   (let [{:keys [body]}
         (http/post "https://sandbox.safaricom.co.ke/mpesa/reversal/v1/request"
                    {:headers     {"Content-Type" "application/json"}
@@ -301,7 +323,7 @@
                     :body        (write-str
                                    {:Initiator              initiator
                                     :SecurityCredential     security-credential
-                                    :CommandID              "TransactionReversal"
+                                    :CommandID              command-id
                                     :TransactionID          transaction-id
                                     :Amount                 amount
                                     :ReceiverParty          short-code
