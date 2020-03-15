@@ -306,6 +306,16 @@
                         occasion         "Reversal"
                         receiver-id-type "4"
                         command-id       "TransactionReversal"}}]
+  {:pre [(and (not= transaction-id nil) (string? transaction-id))
+         (and (not= amount nil) (number? amount))
+         (and (not= queue-url nil) (string? queue-url))
+         (and (not= result-url nil) (string? result-url))
+         (and (not= short-code nil) (string? short-code))
+         (when remarks (string? remarks))
+         (when occasion (string? occasion))
+         (and (not= transaction-id nil) (string? transaction-id))
+         (when command-id (string? command-id))
+         (and (not= security-credential nil) (string? security-credential))]}
   (let [{:keys [body]}
         (http/post "https://sandbox.safaricom.co.ke/mpesa/reversal/v1/request"
                    {:headers     {"Content-Type" "application/json"}
