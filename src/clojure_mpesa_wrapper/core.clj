@@ -335,6 +335,16 @@
     (read-str body :key-fn keyword)))
 
 
+(defn lipa-na-mpesa-online-query [{:keys [short-code password timestamp checkout-request-id]}]
+  (let [{:keys [body]}
+        (http/post "https://sandbox.safaricom.co.ke/mpesa/stkpushquery/v1/query"
+                   {:headers     {"Content-Type" "application/json"}
+                    :oauth-token "ACCESS_TOKEN"
+                    :body        (clojure.data.json/write-str {:BusinessShortCode short-code
+                                                               :Password          password
+                                                               :Timestamp         timestamp
+                                                               :CheckoutRequestID checkout-request-id})})]
+    (read-str body :key-fn keyword)))
 
 
 
