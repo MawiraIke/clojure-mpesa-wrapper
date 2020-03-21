@@ -1,8 +1,9 @@
 # Clojure M-Pesa Wrapper
 
+![M-Pesa](images/mpesa.png)
+
 A clojure wrapper around mpesa daraja api
 
-Work in progress, feel free to contribute.
 
 Supported endpoints,
 1. Authentication 
@@ -12,11 +13,8 @@ Supported endpoints,
 5. C2B API
 6. Lipa na Mpesa
 7. Lipa na M-Pesa Online
-7. Reversal 
-
-Looking to include, 
-1. Transaction Status
-
+8. Reversal 
+9. Transaction Status
 
 ## License
 
