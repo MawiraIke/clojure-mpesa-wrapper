@@ -336,6 +336,25 @@
 
 
 
-
-
-
+(defn transaction-status [{:keys [initiator security-credential command-id transaction-id party-a
+                                  identifier-type result-url queue-timeout-url remarks occasion]
+                           :or   {remarks   "TransactionReversal"
+                                  occasion  "TransactionReversal"
+                                  command-id "TransactionStatusQuery"
+                                  identifier-type "1"}}]
+  (let [{:keys [body]}
+        (http/post "https://sandbox.safaricom.co.ke/mpesa/transactionstatus/v1/query"
+                   {:headers     {"Content-Type" "application/json"}
+                    :oauth-token "ACCESS_TOKEN"
+                    :body        (write-str
+                                   {:Initiator          initiator
+                                    :SecurityCredential security-credential
+                                    :CommandID          command-id
+                                    :TransactionID      transaction-id
+                                    :PartyA             party-a
+                                    :IdentifierType     identifier-type
+                                    :ResultURL          result-url
+                                    :QueueTimeOutURL    queue-timeout-url
+                                    :Remarks            remarks
+                                    :Occasion           occasion})})]
+    (read-str body :key-fn keyword)))
