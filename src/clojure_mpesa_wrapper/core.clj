@@ -335,6 +335,21 @@
     (read-str body :key-fn keyword)))
 
 
+;; Lipa na M-Pesa Online Query Request
+;; Expects a map with the following keys,
+;;   :short-code -          Business Short Code
+;;   :password -            Password
+;;   :timestamp -           Timestamp
+;;   :checkout-request-id - Checkout RequestID
+;;
+;; The response parameters are:
+;;   :MerchantRequestID -   Merchant Request ID
+;;   :CheckoutRequestID -   Check out Request ID
+;;   :ResponseCode -        Response Code
+;;   :ResultDesc -          Result Desc
+;;   :ResponseDescription - Response Description message
+;;   :ResultCode -          Result Code
+
 (defn lipa-na-mpesa-online-query [{:keys [short-code password timestamp checkout-request-id]}]
   (let [{:keys [body]}
         (http/post "https://sandbox.safaricom.co.ke/mpesa/stkpushquery/v1/query"
