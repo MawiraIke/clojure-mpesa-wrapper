@@ -11,11 +11,11 @@ Supported endpoints,
 4. Check balance
 5. C2B API
 6. Lipa na Mpesa
+7. Lipa na M-Pesa Online
 7. Reversal 
 
 Looking to include, 
-1. Lipa na M-Pesa Online
-2. Transaction Status
+1. Transaction Status
 
 
 ## License
