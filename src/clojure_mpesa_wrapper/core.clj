@@ -362,5 +362,42 @@
     (read-str body :key-fn keyword)))
 
 
+;; Transaction status
 
-
+;; Transaction Status API checks the status of a B2B, B2C and C2B APIs transactions.
+;; Expects a map with the following keys
+;; initiator -              Required, String, The name of the initiator initiating the request
+;; security-credential -  	Required, String, Base64 encoded string of the M-Pesa short code and password, which is
+;;                          encrypted using M-Pesa
+;;                          public key and validates the transaction on M-Pesa Core system.
+;; command-id -             Optional, String, Unique command for each transaction type, possible values are:
+;;                          TransactionStatusQuery.
+;; transaction-id -         Required, Number, Organization Receiving the funds.
+;; party-a -                Required, Number, Organization/MSISDN receiving the transaction
+;; identifier-type -        Type of organization receiving the transaction
+;; result-url -             Required, String, The path that stores information of transaction.
+;; queue-timeout-url -      Required, String, The path that stores information of time out transaction.
+;; remarks -                Optional, String, Comments that are sent along with the transaction.
+;; occasion -               Optional, String
+(defn transaction-status [{:keys [initiator security-credential command-id transaction-id party-a
+                                  identifier-type result-url queue-timeout-url remarks occasion]
+                           :or   {remarks   "TransactionReversal"
+                                  occasion  "TransactionReversal"
+                                  command-id "TransactionStatusQuery"
+                                  identifier-type "1"}}]
+  (let [{:keys [body]}
+        (http/post "https://sandbox.safaricom.co.ke/mpesa/transactionstatus/v1/query"
+                   {:headers     {"Content-Type" "application/json"}
+                    :oauth-token "ACCESS_TOKEN"
+                    :body        (write-str
+                                   {:Initiator          initiator
+                                    :SecurityCredential security-credential
+                                    :CommandID          command-id
+                                    :TransactionID      transaction-id
+                                    :PartyA             party-a
+                                    :IdentifierType     identifier-type
+                                    :ResultURL          result-url
+                                    :QueueTimeOutURL    queue-timeout-url
+                                    :Remarks            remarks
+                                    :Occasion           occasion})})]
+    (read-str body :key-fn keyword)))
