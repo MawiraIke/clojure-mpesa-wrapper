@@ -1,4 +1,6 @@
-# Clojure M-Pesa Wrapper
+![Clojure CI](https://github.com/MawiraIke/clojure-mpesa-wrapper/workflows/Clojure%20CI/badge.svg?branch=master)
+
+## Clojure M-Pesa Wrapper
 
 ![M-Pesa](images/mpesa.png)
 
