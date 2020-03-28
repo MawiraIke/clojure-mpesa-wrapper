@@ -12,16 +12,17 @@
 A clojure wrapper around mpesa daraja api
 
 
-Supported endpoints,
-1. Authentication 
-2. B2C API
-3. B2B API
-4. Check balance
-5. C2B API
-6. Lipa na Mpesa
-7. Lipa na M-Pesa Online
-8. Reversal 
-9. Transaction Status
+### Supported endpoints
+1. Authentication ```auth```
+2. B2C API ```b2c```
+3. B2B API ```b2b```
+4. Check balance ```balance```
+5. C2B API ```c2b-reg``` and ```c2b-sim```
+6. Lipa na Mpesa ```lipa-na-mpesa```
+7. Lipa na M-Pesa Online ```lipa-na-mpesa-online-query```
+8. Reversal ```reversal```
+9. Transaction Status ```transaction-status```  
+Read comments for help on how to use the above functions
 
 ## License
 

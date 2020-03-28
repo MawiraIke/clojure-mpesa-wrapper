@@ -246,7 +246,7 @@
 ;;   :transaction-description     Optional, String, A description of the transaction, default, "Lipa na Mpesa Online".
 ;;                                Must be less than 20 characters
 ;;   :passkey                     Optional, String, Lipa na mpesa pass key.
-(defn lipa-na-mpesa-online [{:keys [short-code transaction-type amount phone-number
+(defn lipa-na-mpesa [{:keys [short-code transaction-type amount phone-number
                                     callback-url account-reference transaction-description passkey]
                              :or   {account-reference       "account"
                                     transaction-type        "CustomerPayBillOnline"
@@ -281,6 +281,34 @@
                            :CallBackURL       callback-url
                            :AccountReference  account-reference
                            :TransactionDesc   transaction-description})})]
+    (read-str body :key-fn keyword)))
+
+
+
+;; Lipa na M-Pesa Online Query Request
+;; Expects a map with the following keys,
+;;   :short-code -          Business Short Code
+;;   :password -            Password
+;;   :timestamp -           Timestamp
+;;   :checkout-request-id - Checkout RequestID
+;;
+;; The response parameters are:
+;;   :MerchantRequestID -   Merchant Request ID
+;;   :CheckoutRequestID -   Check out Request ID
+;;   :ResponseCode -        Response Code
+;;   :ResultDesc -          Result Desc
+;;   :ResponseDescription - Response Description message
+;;   :ResultCode -          Result Code
+
+(defn lipa-na-mpesa-online-query [{:keys [short-code password timestamp checkout-request-id]}]
+  (let [{:keys [body]}
+        (http/post "https://sandbox.safaricom.co.ke/mpesa/stkpushquery/v1/query"
+                   {:headers     {"Content-Type" "application/json"}
+                    :oauth-token "ACCESS_TOKEN"
+                    :body        (clojure.data.json/write-str {:BusinessShortCode short-code
+                                                               :Password          password
+                                                               :Timestamp         timestamp
+                                                               :CheckoutRequestID checkout-request-id})})]
     (read-str body :key-fn keyword)))
 
 
@@ -335,33 +363,6 @@
     (read-str body :key-fn keyword)))
 
 
-;; Lipa na M-Pesa Online Query Request
-;; Expects a map with the following keys,
-;;   :short-code -          Business Short Code
-;;   :password -            Password
-;;   :timestamp -           Timestamp
-;;   :checkout-request-id - Checkout RequestID
-;;
-;; The response parameters are:
-;;   :MerchantRequestID -   Merchant Request ID
-;;   :CheckoutRequestID -   Check out Request ID
-;;   :ResponseCode -        Response Code
-;;   :ResultDesc -          Result Desc
-;;   :ResponseDescription - Response Description message
-;;   :ResultCode -          Result Code
-
-(defn lipa-na-mpesa-online-query [{:keys [short-code password timestamp checkout-request-id]}]
-  (let [{:keys [body]}
-        (http/post "https://sandbox.safaricom.co.ke/mpesa/stkpushquery/v1/query"
-                   {:headers     {"Content-Type" "application/json"}
-                    :oauth-token "ACCESS_TOKEN"
-                    :body        (clojure.data.json/write-str {:BusinessShortCode short-code
-                                                               :Password          password
-                                                               :Timestamp         timestamp
-                                                               :CheckoutRequestID checkout-request-id})})]
-    (read-str body :key-fn keyword)))
-
-
 ;; Transaction status
 
 ;; Transaction Status API checks the status of a B2B, B2C and C2B APIs transactions.
@@ -381,9 +382,9 @@
 ;; occasion -               Optional, String
 (defn transaction-status [{:keys [initiator security-credential command-id transaction-id party-a
                                   identifier-type result-url queue-timeout-url remarks occasion]
-                           :or   {remarks   "TransactionReversal"
-                                  occasion  "TransactionReversal"
-                                  command-id "TransactionStatusQuery"
+                           :or   {remarks         "TransactionReversal"
+                                  occasion        "TransactionReversal"
+                                  command-id      "TransactionStatusQuery"
                                   identifier-type "1"}}]
   (let [{:keys [body]}
         (http/post "https://sandbox.safaricom.co.ke/mpesa/transactionstatus/v1/query"
