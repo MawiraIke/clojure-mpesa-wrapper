@@ -13,6 +13,9 @@
         encoder (java.util.Base64/getEncoder)]
     (.encodeToString encoder message-bytes)))
 
+;; Generate security credentials
+(defn generate-security-credentials [short-code pass-key]
+  (encode (str short-code pass-key)))
 
 ;; ------------- API Methods
 
