@@ -40,7 +40,7 @@
 ;;   :result-url -             Required, String, The path that receives a successful transaction
 ;;   :security-credential -    Required, String, Base64 encoded string of the M-Pesa short code and password, which is
 ;;                             encrypted using M-Pesa public key and validates the transaction on
-;;                             M-Pesa Core system.
+;;                             M-Pesa Core system. Use `generate-security-credentials` method above
 (defn balance [{:keys [initiator short-code remarks queue-url result-url security-credential]
                 :or   {remarks "Checking account balance"}}]
   {:pre [(not= initiator nil) (not= security-credential nil) (not= short-code nil) (not= queue-url nil)
@@ -70,7 +70,8 @@
 ;; Expects a map with the following keys:
 ;;    :initiator - 	              Required, String, This is the credential/username used to authenticate the transaction request.
 ;;    :security-credential - 	    Required, String, Base64 encoded string of the B2B short code and password, which is encrypted using
-;;                                M-Pesa public key and validates the transaction on M-Pesa Core system.
+;;                                M-Pesa public key and validates the transaction on M-Pesa Core system. Use
+;;                                `generate-security-credentials` method above
 ;;    :command-id -               Optional, String, Unique command for each transaction type, possible values are: BusinessPayBill,
 ;;                                MerchantToMerchantTransfer, MerchantTransferFromMerchantToWorking,
 ;;                                MerchantServicesMMFAccountTransfer, AgencyFloatAdvance
@@ -302,7 +303,6 @@
 ;;   :ResultDesc -          Result Desc
 ;;   :ResponseDescription - Response Description message
 ;;   :ResultCode -          Result Code
-
 (defn lipa-na-mpesa-online-query [{:keys [short-code password timestamp checkout-request-id]}]
   (let [{:keys [body]}
         (http/post "https://sandbox.safaricom.co.ke/mpesa/stkpushquery/v1/query"
@@ -331,6 +331,7 @@
 ;;   :command-id -          Optional, String, Takes only 'TransactionReversal' Command id
 ;;   :security-credential - Required, String, Base64 encoded string of the M-Pesa short code and password, which is
 ;;                          encrypted using M-Pesa public key and validates the transaction on M-Pesa Core system.
+;;                          Use `generate-security-credentials` method above
 (defn reversal [{:keys [transaction-id amount queue-url result-url short-code remarks occasion initiator
                         receiver-id-type command-id security-credential]
                  :or   {remarks          "Reversal"
@@ -367,13 +368,12 @@
 
 
 ;; Transaction status
-
 ;; Transaction Status API checks the status of a B2B, B2C and C2B APIs transactions.
 ;; Expects a map with the following keys
 ;; initiator -              Required, String, The name of the initiator initiating the request
 ;; security-credential -  	Required, String, Base64 encoded string of the M-Pesa short code and password, which is
-;;                          encrypted using M-Pesa
-;;                          public key and validates the transaction on M-Pesa Core system.
+;;                          encrypted using M-Pesa public key and validates the transaction on M-Pesa Core system.
+;;                          Use `generate-security-credentials` method above
 ;; command-id -             Optional, String, Unique command for each transaction type, possible values are:
 ;;                          TransactionStatusQuery.
 ;; transaction-id -         Required, Number, Organization Receiving the funds.
