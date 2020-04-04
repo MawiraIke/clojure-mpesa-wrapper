@@ -1,4 +1,4 @@
-(defproject clojure-mpesa-wrapper "1.0.0-SNAPSHOT"
+(defproject clojure-mpesa-wrapper "1.0.1-SNAPSHOT"
   :description "A clojure wrapper around mpesa daraja api"
   :url "https://github.com/MawiraIke/clojure-mpesa-wrapper"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"
