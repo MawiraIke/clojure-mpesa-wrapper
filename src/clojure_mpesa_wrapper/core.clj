@@ -49,8 +49,8 @@
   (let [url "https://sandbox.safaricom.co.ke/mpesa/accountbalance/v1/query"
         {:keys [body]}
         (http/post url
-                   {:headers     {"Content-Type" "application/json"}
-                    :oauth-token access-token
+                   {:headers     {"Content-Type" "application/json"
+                                  "Authorization" access-token}
                     :body        (write-str {:Initiator          initiator
                                              :SecurityCredential security-credential
                                              :CommandID          "AccountBalance"
@@ -108,8 +108,8 @@
   (let [{:keys [body]}
         (http/post
           "https://sandbox.safaricom.co.ke/mpesa/b2b/v1/paymentrequest"
-          {:headers     {"Content-Type" "application/json"}
-           :oauth-token access-token
+          {:headers     {"Content-Type" "application/json"
+                                  "Authorization" access-token}
            :body        (write-str {:Initiator              initiator
                                     :SecurityCredential     security-credential
                                     :CommandID              command-id
@@ -151,8 +151,8 @@
          (string? queue-url) (string? result-url)]}
   (let [{:keys [body]}
         (http/post "https://sandbox.safaricom.co.ke/mpesa/b2c/v1/paymentrequest"
-                   {:headers     {"Content-Type" "application/json"}
-                    :oauth-token access-token
+                   {:headers     {"Content-Type" "application/json"
+                                  "Authorization" access-token}
                     :body        (write-str
                                    {:InitiatorName      initiator-name
                                     :SecurityCredential security-credential
@@ -197,8 +197,8 @@
   (let [{:keys [body]}
         (http/post
           "https://sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl"
-          {:headers     {"Content-Type" "application/json"}
-           :oauth-token access-token
+          {:headers     {"Content-Type" "application/json"
+                                  "Authorization" access-token}
            :body        (write-str {:ShortCode       short-code
                                     :ResponseType    response-type
                                     :ConfirmationURL confirmation-url
@@ -226,8 +226,8 @@
          (and (not= bill-ref-number nil) (string? bill-ref-number))]}
   (let [{:keys [body]}
         (http/post "https://sandbox.safaricom.co.ke/mpesa/c2b/v1/simulate"
-                   {:headers     {"Content-Type" "application/json"}
-                    :oauth-token access-token
+                   {:headers     {"Content-Type" "application/json"
+                                  "Authorization" access-token}
                     :body        (write-str {:ShortCode     short-code
                                              :CommandID     command-id
                                              :Amount        amount
@@ -271,8 +271,8 @@
         {:keys [body]}
         (clj-http.client/post
           url
-          {:headers     {"Content-Type" "application/json"}
-           :oauth-token access-token
+          {:headers     {"Content-Type" "application/json"
+                                  "Authorization" access-token}
            :body        (clojure.data.json/write-str
                           {:BusinessShortCode short-code
                            :Password          encoding
@@ -306,8 +306,8 @@
 (defn lipa-na-mpesa-online-query [{:keys [access-token short-code password timestamp checkout-request-id]}]
   (let [{:keys [body]}
         (http/post "https://sandbox.safaricom.co.ke/mpesa/stkpushquery/v1/query"
-                   {:headers     {"Content-Type" "application/json"}
-                    :oauth-token access-token
+                   {:headers     {"Content-Type" "application/json"
+                                  "Authorization" access-token}
                     :body        (clojure.data.json/write-str {:BusinessShortCode short-code
                                                                :Password          password
                                                                :Timestamp         timestamp
@@ -350,8 +350,8 @@
          (and (not= security-credential nil) (string? security-credential))]}
   (let [{:keys [body]}
         (http/post "https://sandbox.safaricom.co.ke/mpesa/reversal/v1/request"
-                   {:headers     {"Content-Type" "application/json"}
-                    :oauth-token access-token
+                   {:headers     {"Content-Type" "application/json"
+                                  "Authorization" access-token}
                     :body        (write-str
                                    {:Initiator              initiator
                                     :SecurityCredential     security-credential
@@ -391,8 +391,8 @@
                                   identifier-type "1"}}]
   (let [{:keys [body]}
         (http/post "https://sandbox.safaricom.co.ke/mpesa/transactionstatus/v1/query"
-                   {:headers     {"Content-Type" "application/json"}
-                    :oauth-token access-token
+                   {:headers     {"Content-Type" "application/json"
+                                  "Authorization" access-token}
                     :body        (write-str
                                    {:Initiator          initiator
                                     :SecurityCredential security-credential
