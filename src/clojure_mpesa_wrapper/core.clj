@@ -13,26 +13,34 @@
         encoder (java.util.Base64/getEncoder)]
     (.encodeToString encoder message-bytes)))
 
-;; Generate security credentials
-(defn generate-security-credentials [short-code pass-key]
-  (encode (str short-code pass-key)))
-
-;; ------------- API Methods
-
-
 ;; Authenticate,
 ;; Expects a key and a secret, both should be strings.
+;; This function returns an access token which should be passed to `generate-access-token` below
+;; before being passed to the functions
 (defn auth [client-key client-secret]
   {:pre [(not= client-key nil) (not= client-secret nil) (string? client-key) (string? client-secret)]}
   (let [url "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
         {:keys [body]} (http/get url {:basic-auth [client-key client-secret]})]
     (read-str body :key-fn keyword)))
 
+;; Generate access-token to pass to the functions,
+;; This function needs an access token generated using the `auth` method above
+;;   else, pass in the client key and secret.
+(defn generate-access-token
+  ([access-token]
+   (str "Bearer " access-token))
+  ([client-key client-secret]
+   (generate-access-token (auth client-key client-secret))))
+
+;; ------------- API Methods
+
+
 
 
 ;; Check Account balance
 ;; Use this API to enquire the balance on an M-Pesa BuyGoods (Till Number). Expects a
 ;; map with the following keys
+;;   :access-token -           Required, String, The access token
 ;;   :initiator -              Required, String, The credential/username used to authenticate the transaction request
 ;;   :short-code -             Required, Integer, The short code of the organization receiving the funds
 ;;   :remarks -                Optional, String, Comments that are sent along with the transaction
@@ -49,16 +57,16 @@
   (let [url "https://sandbox.safaricom.co.ke/mpesa/accountbalance/v1/query"
         {:keys [body]}
         (http/post url
-                   {:headers     {"Content-Type" "application/json"
-                                  "Authorization" access-token}
-                    :body        (write-str {:Initiator          initiator
-                                             :SecurityCredential security-credential
-                                             :CommandID          "AccountBalance"
-                                             :PartyA             short-code
-                                             :IdentifierType     "4"
-                                             :Remarks            remarks
-                                             :QueueTimeOutURL    queue-url
-                                             :ResultURL          result-url})})]
+                   {:headers {"Content-Type"  "application/json"
+                              "Authorization" (generate-access-token access-token)}
+                    :body    (write-str {:Initiator          initiator
+                                         :SecurityCredential security-credential
+                                         :CommandID          "AccountBalance"
+                                         :PartyA             short-code
+                                         :IdentifierType     "4"
+                                         :Remarks            remarks
+                                         :QueueTimeOutURL    queue-url
+                                         :ResultURL          result-url})})]
     (read-str body :key-fn keyword)))
 
 
@@ -68,6 +76,7 @@
 ;; requires a valid and verified B2B M-Pesa short code for the business initiating the transaction and the both
 ;; businesses involved in the transaction.
 ;; Expects a map with the following keys:
+;;    :access-token -             Required, String, The access token
 ;;    :initiator - 	              Required, String, This is the credential/username used to authenticate the transaction request.
 ;;    :security-credential - 	    Required, String, Base64 encoded string of the B2B short code and password, which is encrypted using
 ;;                                M-Pesa public key and validates the transaction on M-Pesa Core system. Use
@@ -108,20 +117,20 @@
   (let [{:keys [body]}
         (http/post
           "https://sandbox.safaricom.co.ke/mpesa/b2b/v1/paymentrequest"
-          {:headers     {"Content-Type" "application/json"
-                                  "Authorization" access-token}
-           :body        (write-str {:Initiator              initiator
-                                    :SecurityCredential     security-credential
-                                    :CommandID              command-id
-                                    :SenderIdentifierType   sender-identifier-type
-                                    :RecieverIdentifierType receiver-identifier-type
-                                    :Amount                 amount
-                                    :PartyA                 party-a
-                                    :PartyB                 party-b
-                                    :AccountReference       account-reference
-                                    :Remarks                remarks
-                                    :QueueTimeOutURL        queue-url
-                                    :ResultURL              result-url})})]
+          {:headers {"Content-Type"  "application/json"
+                     "Authorization" (generate-access-token access-token)}
+           :body    (write-str {:Initiator              initiator
+                                :SecurityCredential     security-credential
+                                :CommandID              command-id
+                                :SenderIdentifierType   sender-identifier-type
+                                :RecieverIdentifierType receiver-identifier-type
+                                :Amount                 amount
+                                :PartyA                 party-a
+                                :PartyB                 party-b
+                                :AccountReference       account-reference
+                                :Remarks                remarks
+                                :QueueTimeOutURL        queue-url
+                                :ResultURL              result-url})})]
     (read-str body :key-fn keyword)))
 
 
@@ -130,6 +139,7 @@
 ;; This API enables Business to Customer (B2C) transactions between a company and customers who are the end-users of its
 ;; products or services. Use of this API requires a valid and verified B2C M-Pesa Short code.
 ;; Expects a map with the following keys:
+;;   :access-token -  Required, String, The access token
 ;;   initiator-name - Required, String, This is the credential/username used to authenticate the transaction request.
 ;;   command-id -     Optional, String, Unique command for each transaction type e.g. SalaryPayment, BusinessPayment,
 ;;                    PromotionPayment
@@ -151,19 +161,19 @@
          (string? queue-url) (string? result-url)]}
   (let [{:keys [body]}
         (http/post "https://sandbox.safaricom.co.ke/mpesa/b2c/v1/paymentrequest"
-                   {:headers     {"Content-Type" "application/json"
-                                  "Authorization" access-token}
-                    :body        (write-str
-                                   {:InitiatorName      initiator-name
-                                    :SecurityCredential security-credential
-                                    :CommandID          command-id
-                                    :Amount             amount
-                                    :PartyA             sender-party
-                                    :PartyB             receiver-party
-                                    :Remarks            remarks
-                                    :QueueTimeOutURL    queue-url
-                                    :ResultURL          result-url
-                                    :Occasion           occasion})})]
+                   {:headers {"Content-Type"  "application/json"
+                              "Authorization" (generate-access-token access-token)}
+                    :body    (write-str
+                               {:InitiatorName      initiator-name
+                                :SecurityCredential security-credential
+                                :CommandID          command-id
+                                :Amount             amount
+                                :PartyA             sender-party
+                                :PartyB             receiver-party
+                                :Remarks            remarks
+                                :QueueTimeOutURL    queue-url
+                                :ResultURL          result-url
+                                :Occasion           occasion})})]
     (read-str body :key-fn keyword)))
 
 
@@ -180,6 +190,7 @@
 ;; party system. A confirmation request of the transaction is then sent by M-Pesa through the confirmation URL
 ;; back to the 3rd party which then should respond with a success acknowledging the confirmation.
 ;; Expects a map with the following keys:
+;;   :access-token -     Required, String, The access token
 ;;   :short-code -       Required, Number, The short code of the organization.
 ;;   :response-type -    Required, String, Default response type for timeout.
 ;;   :confirmation-url - Required, String, Confirmation URL for the client.
@@ -197,16 +208,17 @@
   (let [{:keys [body]}
         (http/post
           "https://sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl"
-          {:headers     {"Content-Type" "application/json"
-                                  "Authorization" access-token}
-           :body        (write-str {:ShortCode       short-code
-                                    :ResponseType    response-type
-                                    :ConfirmationURL confirmation-url
-                                    :ValidationURL   validation-url})})]
+          {:headers {"Content-Type"  "application/json"
+                     "Authorization" (generate-access-token access-token)}
+           :body    (write-str {:ShortCode       short-code
+                                :ResponseType    response-type
+                                :ConfirmationURL confirmation-url
+                                :ValidationURL   validation-url})})]
     (read-str body :key-fn keyword)))
 
 
 ;; Params
+;;   :access-token -    Required, String, The access token
 ;;   :short-code -      Required, Number, 6 digit M-Pesa Till Number or PayBill Number.
 ;;   :command-id -      Optional, String, Unique command for each transaction type.
 ;;   :amount     -      Required, Number, The amount been transacted.
@@ -226,13 +238,13 @@
          (and (not= bill-ref-number nil) (string? bill-ref-number))]}
   (let [{:keys [body]}
         (http/post "https://sandbox.safaricom.co.ke/mpesa/c2b/v1/simulate"
-                   {:headers     {"Content-Type" "application/json"
-                                  "Authorization" access-token}
-                    :body        (write-str {:ShortCode     short-code
-                                             :CommandID     command-id
-                                             :Amount        amount
-                                             :Msisdn        msisdn
-                                             :BillRefNumber bill-ref-number})})]
+                   {:headers {"Content-Type"  "application/json"
+                              "Authorization" (generate-access-token access-token)}
+                    :body    (write-str {:ShortCode     short-code
+                                         :CommandID     command-id
+                                         :Amount        amount
+                                         :Msisdn        msisdn
+                                         :BillRefNumber bill-ref-number})})]
     (read-str body :key-fn keyword)))
 
 
@@ -240,6 +252,7 @@
 ;; Lipa na mpesa,
 ;; Only works with Pay Bill. Buy Goods is not currently supported by the API.
 ;; Expected argument is a map containing key value pairs of:
+;;   :access-token -              Required, String, The access token
 ;;   :short-code,                 Required, Number, The organization short-code used to receive the transaction
 ;;   :transaction-type,           Optional, String, Transaction type, default, "CustomerPayBillOnline"
 ;;                                The only supported type is "CustomerPayBillOnline"
@@ -251,10 +264,10 @@
 ;;                                Must be less than 20 characters
 ;;   :passkey                     Optional, String, Lipa na mpesa pass key.
 (defn lipa-na-mpesa [{:keys [access-token short-code transaction-type amount phone-number
-                                    callback-url account-reference transaction-description passkey]
-                             :or   {account-reference       "account"
-                                    transaction-type        "CustomerPayBillOnline"
-                                    transaction-description "Lipa na Mpesa Online"}}]
+                             callback-url account-reference transaction-description passkey]
+                      :or   {account-reference       "account"
+                             transaction-type        "CustomerPayBillOnline"
+                             transaction-description "Lipa na Mpesa Online"}}]
   {:pre [(and (not= short-code nil) (number? short-code))
          (when transaction-type (string? transaction-type))
          (and (not= amount nil) (number? amount) (>= amount 1))
@@ -271,26 +284,27 @@
         {:keys [body]}
         (clj-http.client/post
           url
-          {:headers     {"Content-Type" "application/json"
-                                  "Authorization" access-token}
-           :body        (clojure.data.json/write-str
-                          {:BusinessShortCode short-code
-                           :Password          encoding
-                           :Timestamp         time-stamp
-                           :TransactionType   transaction-type
-                           :Amount            amount
-                           :PartyA            phone-number
-                           :PartyB            short-code
-                           :PhoneNumber       phone-number
-                           :CallBackURL       callback-url
-                           :AccountReference  account-reference
-                           :TransactionDesc   transaction-description})})]
+          {:headers {"Content-Type"  "application/json"
+                     "Authorization" (generate-access-token access-token)}
+           :body    (clojure.data.json/write-str
+                      {:BusinessShortCode short-code
+                       :Password          encoding
+                       :Timestamp         time-stamp
+                       :TransactionType   transaction-type
+                       :Amount            amount
+                       :PartyA            phone-number
+                       :PartyB            short-code
+                       :PhoneNumber       phone-number
+                       :CallBackURL       callback-url
+                       :AccountReference  account-reference
+                       :TransactionDesc   transaction-description})})]
     (read-str body :key-fn keyword)))
 
 
 
 ;; Lipa na M-Pesa Online Query Request
 ;; Expects a map with the following keys,
+;;   :access-token -        Required, String, The access token
 ;;   :short-code -          Business Short Code
 ;;   :password -            Password
 ;;   :timestamp -           Timestamp
@@ -306,12 +320,12 @@
 (defn lipa-na-mpesa-online-query [{:keys [access-token short-code password timestamp checkout-request-id]}]
   (let [{:keys [body]}
         (http/post "https://sandbox.safaricom.co.ke/mpesa/stkpushquery/v1/query"
-                   {:headers     {"Content-Type" "application/json"
-                                  "Authorization" access-token}
-                    :body        (clojure.data.json/write-str {:BusinessShortCode short-code
-                                                               :Password          password
-                                                               :Timestamp         timestamp
-                                                               :CheckoutRequestID checkout-request-id})})]
+                   {:headers {"Content-Type"  "application/json"
+                              "Authorization" (generate-access-token access-token)}
+                    :body    (clojure.data.json/write-str {:BusinessShortCode short-code
+                                                           :Password          password
+                                                           :Timestamp         timestamp
+                                                           :CheckoutRequestID checkout-request-id})})]
     (read-str body :key-fn keyword)))
 
 
@@ -319,6 +333,7 @@
 ;; Reversal
 ;; Reverses a B2B, B2C or C2B M-Pesa transaction.
 ;; Expects a map with the following keys:
+;;   :access-token -        Required, String, The access token
 ;;   :transaction-id -      Required, String, The transaction id for reversal eg LKXXXX1234
 ;;   :amount -              Required, Number, Amount being transacted
 ;;   :queue-url -           Required, String, The path that stores information of time out transaction.
@@ -350,39 +365,40 @@
          (and (not= security-credential nil) (string? security-credential))]}
   (let [{:keys [body]}
         (http/post "https://sandbox.safaricom.co.ke/mpesa/reversal/v1/request"
-                   {:headers     {"Content-Type" "application/json"
-                                  "Authorization" access-token}
-                    :body        (write-str
-                                   {:Initiator              initiator
-                                    :SecurityCredential     security-credential
-                                    :CommandID              command-id
-                                    :TransactionID          transaction-id
-                                    :Amount                 amount
-                                    :ReceiverParty          short-code
-                                    :RecieverIdentifierType receiver-id-type
-                                    :ResultURL              result-url
-                                    :QueueTimeOutURL        queue-url
-                                    :Remarks                remarks
-                                    :Occasion               occasion})})]
+                   {:headers {"Content-Type"  "application/json"
+                              "Authorization" (generate-access-token access-token)}
+                    :body    (write-str
+                               {:Initiator              initiator
+                                :SecurityCredential     security-credential
+                                :CommandID              command-id
+                                :TransactionID          transaction-id
+                                :Amount                 amount
+                                :ReceiverParty          short-code
+                                :RecieverIdentifierType receiver-id-type
+                                :ResultURL              result-url
+                                :QueueTimeOutURL        queue-url
+                                :Remarks                remarks
+                                :Occasion               occasion})})]
     (read-str body :key-fn keyword)))
 
 
 ;; Transaction status
 ;; Transaction Status API checks the status of a B2B, B2C and C2B APIs transactions.
 ;; Expects a map with the following keys
-;; initiator -              Required, String, The name of the initiator initiating the request
-;; security-credential -  	Required, String, Base64 encoded string of the M-Pesa short code and password, which is
-;;                          encrypted using M-Pesa public key and validates the transaction on M-Pesa Core system.
-;;                          Use `generate-security-credentials` method above
-;; command-id -             Optional, String, Unique command for each transaction type, possible values are:
-;;                          TransactionStatusQuery.
-;; transaction-id -         Required, Number, Organization Receiving the funds.
-;; party-a -                Required, Number, Organization/MSISDN receiving the transaction
-;; identifier-type -        Type of organization receiving the transaction
-;; result-url -             Required, String, The path that stores information of transaction.
-;; queue-timeout-url -      Required, String, The path that stores information of time out transaction.
-;; remarks -                Optional, String, Comments that are sent along with the transaction.
-;; occasion -               Optional, String
+;;   :access-token -          Required, String, The access token
+;;   initiator -              Required, String, The name of the initiator initiating the request
+;;   security-credential -  	Required, String, Base64 encoded string of the M-Pesa short code and password, which is
+;;                              encrypted using M-Pesa public key and validates the transaction on M-Pesa Core system.
+;;                              Use `generate-security-credentials` method above
+;;   command-id -             Optional, String, Unique command for each transaction type, possible values are:
+;;                              TransactionStatusQuery.
+;;   transaction-id -         Required, Number, Organization Receiving the funds.
+;;   party-a -                Required, Number, Organization/MSISDN receiving the transaction
+;;   identifier-type -        Type of organization receiving the transaction
+;;   result-url -             Required, String, The path that stores information of transaction.
+;;   queue-timeout-url -      Required, String, The path that stores information of time out transaction.
+;;   remarks -                Optional, String, Comments that are sent along with the transaction.
+;;   occasion -               Optional, String
 (defn transaction-status [{:keys [access-token initiator security-credential command-id transaction-id party-a
                                   identifier-type result-url queue-timeout-url remarks occasion]
                            :or   {remarks         "TransactionReversal"
@@ -391,17 +407,17 @@
                                   identifier-type "1"}}]
   (let [{:keys [body]}
         (http/post "https://sandbox.safaricom.co.ke/mpesa/transactionstatus/v1/query"
-                   {:headers     {"Content-Type" "application/json"
-                                  "Authorization" access-token}
-                    :body        (write-str
-                                   {:Initiator          initiator
-                                    :SecurityCredential security-credential
-                                    :CommandID          command-id
-                                    :TransactionID      transaction-id
-                                    :PartyA             party-a
-                                    :IdentifierType     identifier-type
-                                    :ResultURL          result-url
-                                    :QueueTimeOutURL    queue-timeout-url
-                                    :Remarks            remarks
-                                    :Occasion           occasion})})]
+                   {:headers {"Content-Type"  "application/json"
+                              "Authorization" (generate-access-token access-token)}
+                    :body    (write-str
+                               {:Initiator          initiator
+                                :SecurityCredential security-credential
+                                :CommandID          command-id
+                                :TransactionID      transaction-id
+                                :PartyA             party-a
+                                :IdentifierType     identifier-type
+                                :ResultURL          result-url
+                                :QueueTimeOutURL    queue-timeout-url
+                                :Remarks            remarks
+                                :Occasion           occasion})})]
     (read-str body :key-fn keyword)))
