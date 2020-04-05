@@ -154,7 +154,7 @@
                    remarks queue-url result-url occasion]
             :or   {command-id "BusinessPayment"
                    remarks    "B2C Payment"}}]
-  {:pre [(not= initiator-name nil) (not= security-credential nil) (not= command-id nil)
+  {:pre [(not= initiator-name nil) (not= security-credential nil)
          (not= amount nil) (not= sender-party nil) (not= receiver-party nil) (not= remarks nil)
          (not= queue-url nil) (not= result-url nil) (string? initiator-name) (when command-id (string? command-id))
          (number? amount) (number? sender-party) (number? receiver-party) (when remarks (string? remarks))
