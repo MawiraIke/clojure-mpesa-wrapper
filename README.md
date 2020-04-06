@@ -1,10 +1,6 @@
 ## Clojure M-Pesa Wrapper
 
-![Clojure CI](https://github.com/MawiraIke/clojure-mpesa-wrapper/workflows/Clojure%20CI/badge.svg?branch=master)
-
-
-[![Clojars Project](https://img.shields.io/clojars/v/clojure-mpesa-wrapper.svg)](https://clojars.org/clojure-mpesa-wrapper)
-
+![Clojure CI](https://github.com/MawiraIke/clojure-mpesa-wrapper/workflows/Clojure%20CI/badge.svg?branch=master)  [![Clojars Project](https://img.shields.io/clojars/v/clojure-mpesa-wrapper.svg)](https://clojars.org/clojure-mpesa-wrapper)
 
 
 ![M-Pesa](images/mpesa.png)
