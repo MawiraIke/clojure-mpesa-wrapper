@@ -7,7 +7,7 @@
 
 A clojure wrapper around mpesa daraja api
 
-The demo project can be found [here](https://github.com/MawiraIke/daraja) (Still in development.)
+The demo project can be found [here.](https://github.com/MawiraIke/daraja)
 
 ### Supported endpoints
 1. Authentication ```auth```
